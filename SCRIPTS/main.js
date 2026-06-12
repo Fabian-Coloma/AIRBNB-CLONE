@@ -2,7 +2,6 @@ import { dibujarEstancias } from './render.js';
 
 let todasLasEstancias = [];
 
-// --- 1. CARGA DE DATOS ---
 async function cargarDatos() {
     try {
         const respuesta = await fetch('./stays.json'); 
@@ -15,7 +14,6 @@ async function cargarDatos() {
 let cards = await cargarDatos();
 dibujarEstancias(cards)
 
-// --- 2. SELECCIÓN DE ELEMENTOS DEL DOM ---
 const btnAbrirModal = document.getElementById('btn-abrir-modal'); 
 const modalBusqueda = document.getElementById('modal-busqueda');
 const btnCerrarModal = document.getElementById('btn-cerrar-modal');
@@ -25,7 +23,7 @@ const inputHuespedes = document.getElementById('input-huespedes');
 const btnBuscarDesktop = document.getElementById('btn-buscar-desktop');
 const btnBuscarMobile = document.getElementById('btn-buscar-mobile');
 
-// --- 3. EVENTOS PARA ABRIR Y CERRAR EL MODAL -
+
 btnAbrirModal?.addEventListener('click', () => modalBusqueda?.classList.remove('hidden'));
 btnCerrarModal?.addEventListener('click', () => modalBusqueda?.classList.add('hidden'));
 
@@ -33,7 +31,7 @@ modalBusqueda?.addEventListener('click', (e) => {
     if (e.target === modalBusqueda) modalBusqueda.classList.add('hidden');
 });
 
-// --- 4. LÓGICA DE SELECCIÓN DE CIUDAD DESDE LA LISTA ---
+
 const listaCiudades = document.querySelectorAll('.ciudad-opcion');
 
 listaCiudades.forEach(opcion => {
@@ -41,12 +39,12 @@ listaCiudades.forEach(opcion => {
         const ciudadSeleccionada = this.getAttribute('data-ciudad');
         if (inputCiudad) {
             inputCiudad.value = ciudadSeleccionada;
-            filtrarEstancias(); // Filtra al hacer click
+            filtrarEstancias(); 
         }
     });
 });
 
-// --- 5. LÓGICA DE FILTROS (ESTABLE Y REACTIVA) ---
+
 function filtrarEstancias() {
     if (!inputCiudad) return;
 
@@ -56,7 +54,6 @@ function filtrarEstancias() {
     const estanciasFiltradas = todasLasEstancias.filter((estancia) => {
         const ciudadJSON = estancia.city ? estancia.city.toLowerCase().trim() : '';
         
-        // Comparación directa de ciudades
         const coincideCiudad = ciudadBuscada === '' || ciudadJSON.includes(ciudadBuscada);
         const coincideHuespedes = (estancia.maxGuests || 0) >= huespedesBuscados;
 
@@ -70,11 +67,11 @@ if (inputCiudad) {
     inputCiudad.addEventListener('input', filtrarEstancias);
 }
 
-// Botones de búsqueda cierran el modal según instrucciones del profesor
+
 btnBuscarDesktop?.addEventListener('click', () => modalBusqueda?.classList.add('hidden'));
 btnBuscarMobile?.addEventListener('click', () => modalBusqueda?.classList.add('hidden'));
 
-// --- 6. LOGICA DE CONTADORES (+ Y -) ---
+
 let totalAdultos = 0;
 let totalNinos = 0;
 
@@ -108,7 +105,7 @@ btnRestarAdultos?.addEventListener('click', () => { if (totalAdultos > 0) { tota
 btnSumarNinos?.addEventListener('click', () => { totalNinos++; if (spanContadorNinos) spanContadorNinos.textContent = totalNinos; actualizarHuespedes(); });
 btnRestarNinos?.addEventListener('click', () => { if (totalNinos > 0) { totalNinos--; if (spanContadorNinos) spanContadorNinos.textContent = totalNinos; actualizarHuespedes(); } });
 
-// --- 7. FUNCIONALIDAD DARK MODE NATIVA ---
+
 const btnDarkMode = document.getElementById('btn-dark-mode');
 
 if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -127,8 +124,6 @@ btnDarkMode?.addEventListener('click', () => {
     }
 });
 
-// Inicializar la aplicación
+
 cargarDatos();
 
-// hola
-// hola

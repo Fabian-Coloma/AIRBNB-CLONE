@@ -4,12 +4,12 @@ const textoTotalEstancias = document.getElementById('total-estancias');
 export function dibujarEstancias(estancias) {
     if (!contenedorEstancias) return;
 
-    // Actualizar el contador dinámico en la cabecera
+    
     if (textoTotalEstancias) {
         textoTotalEstancias.textContent = `${estancias.length} stays`;
     }
 
-    // Controlar el estado vacío
+    
     if (estancias.length === 0) {
         contenedorEstancias.innerHTML = `
             <div class="col-span-full text-center py-12">
@@ -26,11 +26,11 @@ export function dibujarEstancias(estancias) {
 
     let html = '';
 
-    // Bucle para pintar las tarjetas
+    
     for (let i = 0; i < estancias.length; i++) {
         let estancia = estancias[i];
 
-        // Lógica de la píldora Super Host
+        
         let superHostHTML = '';
         if (estancia.superHost === true) {
             superHostHTML = '<span class="border border-stone-800 dark:border-stone-200 text-[10px] font-bold px-2 py-0.5 rounded-full mr-2 tracking-wide uppercase text-stone-800 dark:text-stone-200">SUPER HOST</span>';
