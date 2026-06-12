@@ -1,24 +1,26 @@
-// Importamos la función para dibujar las tarjetas desde render.js
 import { dibujarEstancias } from './render.js';
 
-// Variable global para guardar las estancias
 let todasLasEstancias = [];
 
 // --- 1. CARGA DE DATOS ---
 async function cargarDatos() {
-  try {
-    const respuesta = await fetch('/AIRBNB-CLONE/stays.json');
-    todasLasEstancias = await respuesta.json();
-    
-    // Dibujamos las tarjetas por primera vez
-    dibujarEstancias(todasLasEstancias);
-  } catch (error) {
-    console.log("Error al cargar los datos:", error);
-  }
+    try {
+        const respuesta = await fetch('./stays.json'); 
+        todasLasEstancias = await respuesta.json();
+        
+        // Limpiamos los inputs al iniciar para evitar textos fantasmas del navegador
+        if (inputCiudad) inputCiudad.value = '';
+        if (inputHuespedes) inputHuespedes.value = '';
+
+        dibujarEstancias(todasLasEstancias);
+        actualizarEstilosBotones(); 
+    } catch (error) {
+        console.error("Error al cargar los datos:", error);
+    }
 }
 
-// --- 2. SELECCIÓN DE ELEMENTOS DEL HTML ---
-const btnAbrirModal = document.getElementById('btn-abrir-modal');
+// --- 2. SELECCIÓN DE ELEMENTOS DEL DOM ---
+const btnAbrirModal = document.getElementById('btn-abrir-modal'); 
 const modalBusqueda = document.getElementById('modal-busqueda');
 const btnCerrarModal = document.getElementById('btn-cerrar-modal');
 
@@ -28,63 +30,58 @@ const btnBuscarDesktop = document.getElementById('btn-buscar-desktop');
 const btnBuscarMobile = document.getElementById('btn-buscar-mobile');
 
 // --- 3. EVENTOS PARA ABRIR Y CERRAR EL MODAL ---
-btnAbrirModal.addEventListener('click', function() {
-  modalBusqueda.classList.remove('hidden');
+btnAbrirModal?.addEventListener('click', () => modalBusqueda?.classList.remove('hidden'));
+btnCerrarModal?.addEventListener('click', () => modalBusqueda?.classList.add('hidden'));
+
+modalBusqueda?.addEventListener('click', (e) => {
+    if (e.target === modalBusqueda) modalBusqueda.classList.add('hidden');
 });
 
-btnCerrarModal.addEventListener('click', function() {
-  modalBusqueda.classList.add('hidden');
+// --- 4. LÓGICA DE SELECCIÓN DE CIUDAD DESDE LA LISTA ---
+const listaCiudades = document.querySelectorAll('.ciudad-opcion');
+
+listaCiudades.forEach(opcion => {
+    opcion.addEventListener('click', function () {
+        const ciudadSeleccionada = this.getAttribute('data-ciudad');
+        if (inputCiudad) {
+            inputCiudad.value = ciudadSeleccionada;
+            filtrarEstancias(); // Filtra al hacer click
+        }
+    });
 });
 
-modalBusqueda.addEventListener('click', function(evento) {
-  if (evento.target === modalBusqueda) {
-    modalBusqueda.classList.add('hidden');
-  }
-});
-
-// --- 4. LÓGICA DE LOS FILTROS (DINÁMICO EN TIEMPO REAL) ---
+// --- 5. LÓGICA DE FILTROS (ESTABLE Y REACTIVA) ---
 function filtrarEstancias() {
-  const ciudadBuscada = inputCiudad.value.toLowerCase().trim();
-  const huespedesBuscados = parseInt(inputHuespedes.value) || 0; 
+    if (!inputCiudad) return;
 
-  const estanciasFiltradas = todasLasEstancias.filter((estancia) => {
-    const coincideCiudad = estancia.city.toLowerCase().includes(ciudadBuscada) || 
-                           estancia.country.toLowerCase().includes(ciudadBuscada) || 
-                           ciudadBuscada === '';
-    
-    const coincideHuespedes = estancia.maxGuests >= huespedesBuscados;
+    const ciudadBuscada = inputCiudad.value.toLowerCase().trim();
+    const huespedesBuscados = totalAdultos + totalNinos;
 
-    return coincideCiudad && coincideHuespedes;
-  });
+    const estanciasFiltradas = todasLasEstancias.filter((estancia) => {
+        const ciudadJSON = estancia.city ? estancia.city.toLowerCase().trim() : '';
+        
+        // Comparación directa de ciudades
+        const coincideCiudad = ciudadBuscada === '' || ciudadJSON.includes(ciudadBuscada);
+        const coincideHuespedes = (estancia.maxGuests || 0) >= huespedesBuscados;
 
-  // Dibujamos las nuevas tarjetas al instante
-  dibujarEstancias(estanciasFiltradas);
+        return coincideCiudad && coincideHuespedes;
+    });
+
+    dibujarEstancias(estanciasFiltradas);
 }
 
-// --- 5. EVENTOS DE TECLADO Y BOTONES DE BÚSQUEDA ---
+if (inputCiudad) {
+    inputCiudad.addEventListener('input', filtrarEstancias);
+}
 
-// El evento 'input' filtra automáticamente cada vez que escribes una letra
-inputCiudad.addEventListener('input', filtrarEstancias);
+// Botones de búsqueda cierran el modal según instrucciones del profesor
+btnBuscarDesktop?.addEventListener('click', () => modalBusqueda?.classList.add('hidden'));
+btnBuscarMobile?.addEventListener('click', () => modalBusqueda?.classList.add('hidden'));
 
-// Los botones naranjas ahora solo sirven para cerrar el panel
-btnBuscarDesktop.addEventListener('click', function() {
-  modalBusqueda.classList.add('hidden');
-});
-
-btnBuscarMobile.addEventListener('click', function() {
-  modalBusqueda.classList.add('hidden');
-});
-
-// --- 6. INICIO DE LA APLICACIÓN (¡La llave de arranque!) ---
-cargarDatos();
-
-// --- 7. LÓGICA DE LOS CONTADORES DE HUÉSPEDES ---
-
-// Empezamos con 0 huéspedes
+// --- 6. LOGICA DE CONTADORES (+ Y -) ---
 let totalAdultos = 0;
 let totalNinos = 0;
 
-// Seleccionamos los botones y los textos (spans) de los números
 const btnRestarAdultos = document.getElementById('btn-restar-adultos');
 const btnSumarAdultos = document.getElementById('btn-sumar-adultos');
 const spanContadorAdultos = document.getElementById('contador-adultos');
@@ -93,48 +90,46 @@ const btnRestarNinos = document.getElementById('btn-restar-ninos');
 const btnSumarNinos = document.getElementById('btn-sumar-ninos');
 const spanContadorNinos = document.getElementById('contador-ninos');
 
-// Función maestra que actualiza el input principal y filtra
 function actualizarHuespedes() {
-  const total = totalAdultos + totalNinos;
-  
-  // Actualizamos el texto del input para que el usuario vea el total
-  if (total === 0) {
-    inputHuespedes.value = ''; // Si es 0, lo dejamos vacío para que se vea el placeholder
-  } else {
-    inputHuespedes.value = `${total} guests`; // Ejemplo: "3 guests"
-  }
-
-  // Como el valor del input cambió, llamamos a la función que ya tenías para que filtre en tiempo real
-  filtrarEstancias();
+    const total = totalAdultos + totalNinos;
+    if (inputHuespedes) {
+        inputHuespedes.value = total === 0 ? '' : `${total} guests`;
+    }
+    actualizarEstilosBotones();
+    filtrarEstancias();
 }
 
-// --- Eventos para Adultos ---
-btnSumarAdultos.addEventListener('click', function() {
-  totalAdultos++; // Sumamos 1
-  spanContadorAdultos.textContent = totalAdultos; // Pintamos el nuevo número
-  actualizarHuespedes(); // Actualizamos y filtramos
+function actualizarEstilosBotones() {
+    if (totalAdultos === 0) btnRestarAdultos?.classList.add('opacity-30');
+    else btnRestarAdultos?.classList.remove('opacity-30');
+
+    if (totalNinos === 0) btnRestarNinos?.classList.add('opacity-30');
+    else btnRestarNinos?.classList.remove('opacity-30');
+}
+
+btnSumarAdultos?.addEventListener('click', () => { totalAdultos++; if (spanContadorAdultos) spanContadorAdultos.textContent = totalAdultos; actualizarHuespedes(); });
+btnRestarAdultos?.addEventListener('click', () => { if (totalAdultos > 0) { totalAdultos--; if (spanContadorAdultos) spanContadorAdultos.textContent = totalAdultos; actualizarHuespedes(); } });
+btnSumarNinos?.addEventListener('click', () => { totalNinos++; if (spanContadorNinos) spanContadorNinos.textContent = totalNinos; actualizarHuespedes(); });
+btnRestarNinos?.addEventListener('click', () => { if (totalNinos > 0) { totalNinos--; if (spanContadorNinos) spanContadorNinos.textContent = totalNinos; actualizarHuespedes(); } });
+
+// --- 7. FUNCIONALIDAD DARK MODE NATIVA ---
+const btnDarkMode = document.getElementById('btn-dark-mode');
+
+if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+} else {
+    document.documentElement.classList.remove('dark');
+}
+
+btnDarkMode?.addEventListener('click', () => {
+    if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+    }
 });
 
-btnRestarAdultos.addEventListener('click', function() {
-  // Aquí está el candado para que no baje de 0
-  if (totalAdultos > 0) {
-    totalAdultos--; // Restamos 1
-    spanContadorAdultos.textContent = totalAdultos;
-    actualizarHuespedes();
-  }
-});
-
-// --- Eventos para Niños ---
-btnSumarNinos.addEventListener('click', function() {
-  totalNinos++;
-  spanContadorNinos.textContent = totalNinos;
-  actualizarHuespedes();
-});
-
-btnRestarNinos.addEventListener('click', function() {
-  if (totalNinos > 0) {
-    totalNinos--;
-    spanContadorNinos.textContent = totalNinos;
-    actualizarHuespedes();
-  }
-});
+// Inicializar la aplicación
+cargarDatos();

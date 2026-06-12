@@ -1,49 +1,67 @@
-// Seleccionamos el div donde irán las tarjetas
 const contenedorEstancias = document.getElementById('lista-estancias');
+const textoTotalEstancias = document.getElementById('total-estancias');
 
-// Ponemos "export" para que el otro archivo pueda usar esta función
 export function dibujarEstancias(estancias) {
-  let html = '';
+    if (!contenedorEstancias) return;
 
-  // Nuestro clásico bucle for (igual que en la cafetería)
-  for (let i = 0; i < estancias.length; i++) {
-    let estancia = estancias[i];
-
-    // 1. Verificamos si es Super Host
-    let superHostHTML = '';
-    if (estancia.superHost === true) {
-      superHostHTML = '<span class="border border-black text-xs font-bold px-2 py-1 rounded-full mr-2">SUPER HOST</span>';
+    // Actualizar el contador dinámico en la cabecera
+    if (textoTotalEstancias) {
+        textoTotalEstancias.textContent = `${estancias.length} stays`;
     }
 
-    // 2. Verificamos si tiene camas (algunos no tienen la propiedad beds)
-    let camasHTML = '';
-    if (estancia.beds !== null) {
-      camasHTML = `. ${estancia.beds} beds`;
+    // Controlar el estado vacío
+    if (estancias.length === 0) {
+        contenedorEstancias.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <p class="text-stone-500 dark:text-stone-400 text-lg font-medium">
+                    🔍 No se encontraron estancias que coincidan con tu búsqueda.
+                </p>
+                <p class="text-stone-400 dark:text-stone-500 text-sm mt-1">
+                    Intenta seleccionando otra ubicación o reduciendo el número de huéspedes.
+                </p>
+            </div>
+        `;
+        return;
     }
 
-    // 3. Armamos la tarjeta con Tailwind básico
-    html += `
-      <div class="flex flex-col">
-        
-        <img src="${estancia.photo}" class="w-full h-64 object-cover rounded-2xl mb-3" alt="foto estancia">
-        
-        <div class="flex justify-between items-center mb-1">
-          <div class="text-sm text-stone-500 truncate">
-            ${superHostHTML}
-            ${estancia.type} ${camasHTML}
-          </div>
-          <div class="flex items-center text-stone-700">
-            <span class="text-red-500 mr-1 text-lg">★</span>
-            <span>${estancia.rating}</span>
-          </div>
+    let html = '';
+
+    // Bucle para pintar las tarjetas
+    for (let i = 0; i < estancias.length; i++) {
+        let estancia = estancias[i];
+
+        // Lógica de la píldora Super Host
+        let superHostHTML = '';
+        if (estancia.superHost === true) {
+            superHostHTML = '<span class="border border-stone-800 dark:border-stone-200 text-[10px] font-bold px-2 py-0.5 rounded-full mr-2 tracking-wide uppercase text-stone-800 dark:text-stone-200">SUPER HOST</span>';
+        }
+
+        let camasHTML = '';
+        if (estancia.beds !== null && estancia.beds !== undefined) {
+            camasHTML = `. ${estancia.beds} beds`;
+        }
+
+        html += `
+        <div class="flex flex-col gap-3 group">
+            <div class="w-full h-64 overflow-hidden rounded-2xl">
+                <img src="${estancia.photo}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="${estancia.title}">
+            </div>
+            
+            <div class="flex justify-between items-center text-sm mt-1">
+                <div class="flex items-center text-stone-500 dark:text-stone-400 truncate">
+                    ${superHostHTML}
+                    <span class="truncate">${estancia.type} ${camasHTML}</span>
+                </div>
+                <div class="flex items-center gap-1 text-stone-700 dark:text-stone-300 font-medium">
+                    <span class="text-red-500 text-base">★</span>
+                    <span>${estancia.rating}</span>
+                </div>
+            </div>
+            
+            <h3 class="font-semibold text-base text-stone-800 dark:text-stone-100 truncate">${estancia.title}</h3>
         </div>
+        `;
+    }
 
-        <h3 class="font-semibold text-stone-800 truncate">${estancia.title}</h3>
-      
-      </div>
-    `;
-  }
-
-  // Pegamos todo en el HTML
-  contenedorEstancias.innerHTML = html;
+    contenedorEstancias.innerHTML = html;
 }
