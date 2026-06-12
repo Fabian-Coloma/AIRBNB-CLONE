@@ -5,19 +5,15 @@ let todasLasEstancias = [];
 // --- 1. CARGA DE DATOS ---
 async function cargarDatos() {
     try {
-        const respuesta = await fetch('/stays.json'); 
+        const respuesta = await fetch('./stays.json'); 
         todasLasEstancias = await respuesta.json();
-        
-        // Limpiamos los inputs al iniciar para evitar textos fantasmas del navegador
-        if (inputCiudad) inputCiudad.value = '';
-        if (inputHuespedes) inputHuespedes.value = '';
-
-        dibujarEstancias(todasLasEstancias);
-        actualizarEstilosBotones(); 
+        return todasLasEstancias; 
     } catch (error) {
         console.error("Error al cargar los datos:", error);
     }
 }
+let cards = await cargarDatos();
+dibujarEstancias(cards)
 
 // --- 2. SELECCIÓN DE ELEMENTOS DEL DOM ---
 const btnAbrirModal = document.getElementById('btn-abrir-modal'); 
