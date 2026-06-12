@@ -25,7 +25,7 @@ const inputHuespedes = document.getElementById('input-huespedes');
 const btnBuscarDesktop = document.getElementById('btn-buscar-desktop');
 const btnBuscarMobile = document.getElementById('btn-buscar-mobile');
 
-// --- 3. EVENTOS PARA ABRIR Y CERRAR EL MODAL ---
+// --- 3. EVENTOS PARA ABRIR Y CERRAR EL MODAL -
 btnAbrirModal?.addEventListener('click', () => modalBusqueda?.classList.remove('hidden'));
 btnCerrarModal?.addEventListener('click', () => modalBusqueda?.classList.add('hidden'));
 
