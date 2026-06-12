@@ -5,7 +5,7 @@ let todasLasEstancias = [];
 // --- 1. CARGA DE DATOS ---
 async function cargarDatos() {
     try {
-        const respuesta = await fetch('./stays.json'); 
+        const respuesta = await fetch('../public/stays.json'); 
         todasLasEstancias = await respuesta.json();
         
         // Limpiamos los inputs al iniciar para evitar textos fantasmas del navegador
